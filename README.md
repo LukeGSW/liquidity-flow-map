@@ -97,15 +97,23 @@ dall'accrual, coerenza della rotazione, cutoff IS/OOS, e il motore event study
 ## Fase 2 — protocollo pre-registrato (attivo)
 
 Il confine IS/OOS è **congelato**: `IS_END_DATE = "2021-01-04"` in `src/config.py`.
-Le **7 ipotesi** (climax di attenzione settoriale → sottoperformance relativa a
-21/63g; settore trascurato → recupero; blow-off dell'oro mappato su GLD, gamba
-momentum + gamba riassorbimento) sono pre-registrate in **`research/HYPOTHESES.md`**
-con disegno statistico completo (null appaiato per vol, test one-sided, B=5000
-seed=42, BH-FDR q≤0.10) e si eseguono dalla pagina **🧪 Event study fase 2**
-dell'app: calibrazione IS libera e ripetibile, **un solo** passaggio
-out-of-sample a regole ferme. Il motore statistico è `src/event_study.py`
-(puro, coperto dal selftest); la copia operativa delle ipotesi è
-`src/hypotheses.py`.
+Le ipotesi sono pre-registrate in **`research/HYPOTHESES.md`** con disegno
+statistico completo (null appaiato per vol, test one-sided, B=5000 seed=42,
+BH-FDR q≤0.10) e si eseguono dalla pagina **🧪 Event study fase 2** dell'app:
+calibrazione IS libera e ripetibile, **un solo** passaggio out-of-sample a
+regole ferme. Il motore statistico è `src/event_study.py` (puro, coperto dal
+selftest); la copia operativa delle ipotesi è `src/hypotheses.py`.
+
+**Stato: ciclo 1 CHIUSO (2026-08-10).** Calibrazione IS sui prezzi: H1b
+confermata in IS (−1.26% a 63g, q=0.041), famiglia oro bocciata (il momentum
+della quota non si trasferisce a GLD), protocollo ridotto a 4 ipotesi.
+Passaggio OOS 2021→2026: **nessuna conferma statistica** — direzione giusta su
+tutte e 4 (H1b −0.64% a 63g, metà dell'effetto IS) ma q=0.29 con ~50 eventi.
+Esito: il pattern "climax di attenzione → debolezza relativa" è declassato a
+**tilt informativo** nella dashboard; nessuna regola operativa. Registro
+completo delle esecuzioni in `research/HYPOTHESES.md` §7, incluse le opzioni
+per un eventuale ciclo 2 (fattore cross-sectional, con 2021-2026 ormai
+semi-contaminato).
 
 ## Caveat onesti
 
