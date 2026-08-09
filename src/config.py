@@ -97,10 +97,9 @@ PRESSURE_DEMEAN = 63
 # Risoluzioni heatmap (label -> freq pandas)
 HEATMAP_FREQS = {"Settimanale": "W-FRI", "Mensile": "ME"}
 
-# Split cronologico in-sample / out-of-sample per la futura ricerca pattern.
-# IS_END_DATE = None: il cutoff è il 70% posizionale della storia (calcolato su
-# un indice indipendente dai parametri UI, ma che avanza col passare dei giorni).
-# All'avvio della fase 2 CONGELARE qui la data assoluta, es. "2021-01-08",
-# così il confine IS/OOS smette di muoversi.
+# Split cronologico in-sample / out-of-sample per la ricerca pattern.
+# CONGELATO il 2026-08-09 all'avvio della fase 2: l'in-sample termina il
+# 2021-01-04 (ultima data dei CSV usati per la scansione esplorativa).
+# NON modificare senza una nuova pre-registrazione (research/HYPOTHESES.md).
 IS_FRACTION = 0.70
-IS_END_DATE = None
+IS_END_DATE = "2021-01-04"
