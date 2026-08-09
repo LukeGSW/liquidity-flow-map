@@ -1,6 +1,6 @@
 # Pre-registrazione fase 2 — Liquidity Flow Map
 
-**Data di congelamento: 2026-08-09** · In-sample: 2009 → **2021-01-04** (incluso) · Out-of-sample: 2021-01-05 → oggi
+**Versione 2 — 2026-08-09** (v1 stesso giorno; revisione dopo calibrazione IS sui prezzi) · In-sample: 2009 → **2021-01-04** (incluso) · Out-of-sample: 2021-01-05 → oggi · **CICLO 1 CHIUSO il 2026-08-10: nessuna ipotesi confermata (vedi §7)**
 
 Questo documento congela ipotesi e disegno statistico PRIMA di qualsiasi test
 sull'out-of-sample. La copia operativa letta dal codice è `src/hypotheses.py`;
@@ -36,7 +36,7 @@ revisiona PRIMA di toccare l'OOS.
   con **debounce 21g**
 - Split: `IS_END_DATE = "2021-01-04"` (congelato in config)
 
-## 3. Le 7 ipotesi
+## 3. Le ipotesi attive (v2 — 4 test)
 
 | ID | Evento | Esito atteso | Orizzonte | Direzione | Peso |
 |---|---|---|---|---|---|
@@ -44,9 +44,14 @@ revisiona PRIMA di toccare l'OOS.
 | **H1b** | z settore > +2.0 | sottoperformance vs paniere EW | 63g | − | **primaria** |
 | H2 | z settore < −1.5 | sovraperformance vs paniere EW | 63g | + | secondaria |
 | H3a | z settore > +2.0 | rendimento assoluto negativo | 5g | − | secondaria |
-| H3b | z settore > +2.0 | rendimento assoluto negativo | 21g | − | secondaria |
-| **H4a** | z Oro/Metalli > +1.5 | GLD positivo (gamba momentum) | 21g | + | **primaria** |
-| H4b | z Oro/Metalli > +1.5 | GLD negativo da t+21 a t+63 (riassorbimento) | 21→63g | − | secondaria |
+
+### Ipotesi ritirate in calibrazione IS (v1 → v2, OOS mai guardato)
+
+| ID | Motivo del ritiro |
+|---|---|
+| H4a | **Direzione opposta all'attesa**: GLD dopo lo spike di attenzione rende −0.38% a 21g contro +0.41% del null (eccesso −0.79%, p one-sided 0.73, n=15). Il momentum della *quota* (+2 pp, reale) non si trasferisce al *prezzo*: l'attività extra è churn bilaterale, non domanda netta. |
+| H4b | Gamba secondaria della famiglia oro: con la primaria morta esce dal protocollo (era comunque non significativa: eccesso −0.86%, p=0.31). |
+| H3b | La più debole della famiglia settori (eccesso −0.40%, p=0.23) e ridondante con H1a/H3a: tolta per non diluire l'FDR. |
 
 Definizioni precise:
 - **Rendimento forward**: log-rendimento su adjusted_close, in %, da t (o da
@@ -63,7 +68,8 @@ Definizioni precise:
   21g (paniere EW per H1–H3, GLD per H4), esclusi i giorni entro ±10g da un
   evento; bootstrap **B=5000**, **seed=42** (risultati riproducibili).
 - **Test one-sided** nella direzione pre-dichiarata; α = 0.05 per ipotesi.
-- **BH-FDR q ≤ 0.10** sulla famiglia dei 7 test (i falsi positivi si contano).
+- **BH-FDR q ≤ 0.10** sulla famiglia dei test attivi (4 in v2 — i falsi
+  positivi si contano).
 - Numerosità minima: 5 eventi, altrimenti il test è "non eseguibile".
 
 ## 5. Procedura e criteri
@@ -82,4 +88,60 @@ Definizioni precise:
 
 Ipotesi già bocciate in IS e quindi escluse: "spike di attenzione ⇒ mercato
 debole" (VTI), qualsiasi timing di mercato da eventi macro di attenzione,
-segnali dalla pressione firmata del gruppo Cash.
+segnali dalla pressione firmata del gruppo Cash, e — dalla v2 — qualsiasi
+implicazione direzionale sul prezzo di GLD dall'attenzione sull'oro.
+
+## 7. Registro delle esecuzioni
+
+**2026-08-09 — Calibrazione IS (prezzi), protocollo v1, 7 test**
+(`event_study_is.csv`; n = eventi, eccesso = effetto − null, p one-sided)
+
+| ID | n | Effetto % | Null % | Eccesso % | p | q | Esito |
+|---|---|---|---|---|---|---|---|
+| H1a | 120 | −0.37 | +0.12 | −0.49 | 0.051 | 0.157 | ➖ direzione giusta |
+| H1b | 120 | −0.95 | +0.31 | −1.26 | 0.0058 | 0.041 | ✅ confermata in IS |
+| H2 | 144 | +0.24 | −0.38 | +0.62 | 0.108 | 0.190 | ➖ direzione giusta |
+| H3a | 120 | −0.22 | +0.20 | −0.42 | 0.067 | 0.157 | ➖ direzione giusta |
+| H3b | 120 | +0.41 | +0.81 | −0.40 | 0.228 | 0.319 | ➖ debole → ritirata |
+| H4a | 15 | −0.38 | +0.41 | −0.79 | 0.734 | 0.734 | ❌ opposta → ritirata |
+| H4b | 15 | −0.04 | +0.82 | −0.86 | 0.306 | 0.357 | ritirata (famiglia) |
+
+Decisione: protocollo ridotto a v2 (H1a, H1b, H2, H3a).
+
+---
+
+**2026-08-10 — Passaggio OOS (2021-01-05 → 2026-08) — CICLO 1 CHIUSO**
+(`event_study_oos.csv`)
+
+*Nota di protocollo:* il run è avvenuto con la v1 ancora deployata, quindi il
+CSV contiene anche le ipotesi ritirate (famiglia da 7 test). I p per-ipotesi
+non dipendono dalla famiglia; il q è stato **ricalcolato sulla famiglia v2**
+(4 test attivi): tutte le attive risultano q = 0.288.
+
+| ID | n | Effetto % | Null % | Eccesso % | p | q (v2) | Esito |
+|---|---|---|---|---|---|---|---|
+| H1a | 49 | −0.40 | −0.09 | −0.31 | 0.288 | 0.288 | ➖ direzione giusta |
+| H1b | 49 | −0.45 | +0.19 | −0.64 | 0.242 | 0.288 | ➖ direzione giusta (≈metà dell'effetto IS) |
+| H2 | 55 | +0.66 | +0.11 | +0.55 | 0.267 | 0.288 | ➖ direzione giusta |
+| H3a | 49 | −0.22 | +0.23 | −0.46 | 0.113 | 0.288 | ➖ direzione giusta |
+
+Ritirate, riportate solo per trasparenza (nessuna decisione ne dipende):
+H3b di nuovo in direzione opposta (+0.16%, il ritiro era corretto);
+H4a/H4b stavolta in direzione "giusta" (+1.80% / −2.32%, n=8) — con 8 eventi
+il segno rimbalza da un campione all'altro: è la dimostrazione che erano
+rumore, non un motivo per resuscitarle.
+
+**VERDETTO CICLO 1: nessuna ipotesi confermata** secondo il criterio
+pre-registrato (direzione giusta E q ≤ 0.10). Il fenomeno "climax di
+attenzione → debolezza relativa" esce però con direzione giusta in IS **e**
+OOS, con effetto dimezzato (−1.26% → −0.64% a 63g): reale ma debole, e con
+~50 eventi ogni 5 anni la potenza statistica non basta per effetti di questa
+taglia. Esito operativo: **declassato a tilt informativo** nella dashboard;
+nessuna regola di trading.
+
+Conseguenze (§5.3): il 2021-2026 non è più out-of-sample per nessuna ipotesi
+correlata a queste. Un eventuale **ciclo 2** (es. fattore cross-sectional di
+attenzione: rank mensile dei settori per z, long trascurati / short climax —
+usa tutti i dati, non solo gli estremi, quindi molta più potenza) dovrà
+dichiarare che il 2021-2026 è semi-contaminato e cercare la validazione vera
+solo sul futuro non ancora osservato.
