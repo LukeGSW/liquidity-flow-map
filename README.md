@@ -45,8 +45,24 @@ spezzerebbe le quote.
    Sankey: gli accoppiamenti "da chi a chi" non sono identificabili dai dati)
 4. **La pista** — livello vs momentum dell'attenzione con scie (stile RRG)
 
-Più: **modalità ricerca** che nasconde l'out-of-sample (30% finale della storia) per
-non contaminare la futura ricerca pattern, pannello diagnostico dati e download CSV.
+Più: sezione **"Segnali attivi e cosa aspettarsi"** (gruppi in attenzione estrema
+con l'attesa misurata in-sample), **modalità ricerca** che nasconde l'out-of-sample
+(30% finale della storia), pannello diagnostico dati e download CSV.
+
+## Risultati della prima scansione IS (2009 → gen 2021)
+
+Eventi = incrocio di soglia dello z (±1.5/±2, debounce 21g); null appaiato per
+terzili di volatilità; BH-FDR, jackknife, esclusione epoche. In sintesi:
+
+- **Robusto (settori):** mean-reversion dell'attenzione — dopo z > +2 la quota
+  restituisce ~1–1.7 pp entro 63g (17/60 test p<0.05, tutti concordi).
+- **Robusto (macro):** l'attenzione sull'**oro** fa *blow-off*: +2 pp di quota a
+  21g dopo lo spike (coerente nei due semiperiodi), riassorbita a 63g (−1 pp).
+- **Bocciato:** "spike di attenzione → mercato debole" (artefatto del rimbalzo
+  2009); a livello macro nessun evento di attenzione predice VTI nell'IS.
+- **Parcheggiati per la fase 2:** debolezza assoluta a 5–21g dopo spike su
+  Tecnologia/Industriali/Consumi discrezionali (q-FDR ≈ 0.19 su VTI: da
+  ritestare con i rendimenti forward del settore stesso).
 
 ## Deploy su Streamlit Cloud
 
@@ -73,14 +89,23 @@ python scripts/selftest.py          # invarianti pipeline su dati sintetici
 python scripts/selftest.py --live   # + smoke test EODHD con chiave demo
 ```
 
-I check garantiscono: quote che sommano a 1, **nessun look-ahead** (troncare la storia
-non cambia il passato), pressione in [-1, +1], coerenza della rotazione, cutoff IS/OOS.
+Gli 11 check garantiscono: quote che sommano a 1, **nessun look-ahead** (troncare
+la storia non cambia il passato), pressione in [-1, +1] e non inchiodata
+dall'accrual, coerenza della rotazione, cutoff IS/OOS, e il motore event study
+(rileva un effetto piantato, è deterministico a parità di seed, BH-FDR sano).
 
-## Roadmap — fase 2 (ricerca pattern)
+## Fase 2 — protocollo pre-registrato (attivo)
 
-Eventi discreti (es. `z > 2` con pressione positiva) → event study sui rendimenti
-forward vs null appaiato. Protocollo IS/OOS 70/30 cronologico: regole e soglie
-calibrate solo sull'in-sample, congelate, un solo passaggio finale sull'out-of-sample.
+Il confine IS/OOS è **congelato**: `IS_END_DATE = "2021-01-04"` in `src/config.py`.
+Le **7 ipotesi** (climax di attenzione settoriale → sottoperformance relativa a
+21/63g; settore trascurato → recupero; blow-off dell'oro mappato su GLD, gamba
+momentum + gamba riassorbimento) sono pre-registrate in **`research/HYPOTHESES.md`**
+con disegno statistico completo (null appaiato per vol, test one-sided, B=5000
+seed=42, BH-FDR q≤0.10) e si eseguono dalla pagina **🧪 Event study fase 2**
+dell'app: calibrazione IS libera e ripetibile, **un solo** passaggio
+out-of-sample a regole ferme. Il motore statistico è `src/event_study.py`
+(puro, coperto dal selftest); la copia operativa delle ipotesi è
+`src/hypotheses.py`.
 
 ## Caveat onesti
 
