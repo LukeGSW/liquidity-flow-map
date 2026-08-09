@@ -229,6 +229,74 @@ if not rot_last.empty:
 st.divider()
 
 # ===================================================
+# SEZIONE 0b: SEGNALI ATTIVI E ATTESE (scansione IS)
+# ===================================================
+st.subheader("📌 Segnali attivi e cosa aspettarsi")
+st.markdown(
+    f"""
+Gruppi in **attenzione estrema** (|z| ≥ 1.5) al {z_v.index[-1]:%d/%m/%Y}, con l'attesa
+misurata nella scansione in-sample 2009 → gen 2021 (eventi = incrocio soglia z,
+debounce 21g, null appaiato per regime di volatilità). ⚠️ *Attese IS, non ancora
+validate out-of-sample: orientano l'attenzione, non sono regole operative.*
+"""
+)
+
+
+def attesa_is(lvl: str, group: str, zval: float) -> str:
+    """Attesa post-evento misurata nella scansione IS, per livello e gruppo."""
+    if lvl != "Macro-classi":
+        if zval > 0:
+            return ("climax di attenzione: nell'IS la quota ha poi **restituito "
+                    "~1–1.7 pp entro 63 giorni** (mean-reversion; 17/60 test p<0.05, "
+                    "tutti concordi). Mappatura sui prezzi: fase 2.")
+        return ("settore trascurato: nell'IS la quota tende a **recuperare entro "
+                "21–63 giorni**.")
+    if group == "Oro/Metalli" and zval > 0:
+        return ("profilo **blow-off** nell'IS: quota ancora **su per ~1 mese "
+                "(+2 pp, robusto nei due semiperiodi)**, ma **riassorbita a 3 mesi "
+                "(−1 pp)**. Momentum breve, non trend da inseguire.")
+    if group == "Treasury" and zval > 0:
+        return "lieve mean-reversion della quota a 21 giorni nell'IS (−0.3 pp)."
+    if group in ("Treasury", "Credito") and zval < 0:
+        return "rifugio/credito ignorato: nell'IS la quota recupera entro 21–63 giorni."
+    return ("nessuna attesa robusta dall'IS a livello macro: leggerlo come "
+            "informazione di regime, non come timing.")
+
+
+active = z_last[z_last.abs() >= 1.5]
+if active.empty:
+    st.markdown("*Nessun gruppo in attenzione estrema in questo momento: "
+                "regime di rotazione ordinaria.*")
+else:
+    active = active.sort_values(key=lambda s: s.abs(), ascending=False)
+    for g, v in active.items():
+        icona = "🔴" if v > 0 else "🔵"
+        st.markdown(f"- {icona} **{g}** (z {v:+.1f}) — {attesa_is(level, g, v)}")
+
+with st.expander("⚠️ Cosa NON leggere in questa dashboard (testato e bocciato)"):
+    st.markdown(
+        """
+- **Lo spike di attenzione di un settore NON è un segnale ribassista di mercato.**
+  L'ipotesi aggregata è stata testata e bocciata: il p-value spettacolare a 63 giorni
+  (p=0.0004) era un artefatto del rimbalzo 2009 — escludendo il 2008-09 l'effetto
+  crolla (+0.9%, p=0.28). Il matching per volatilità non basta a controllare il
+  "compra dopo il crash".
+- **A livello macro nessun evento di attenzione ha predetto il mercato nell'IS**
+  (112 test su VTI: significativi ≈ attesi dal caso, min q-FDR 0.79). Il livello
+  macro è una mappa di regime, non un segnale di timing sull'equity.
+- **La pressione firmata del gruppo Cash è rumore strutturale** (il prezzo di
+  BIL/SHV si muove quasi solo per accrual): leggerla come "assente".
+- **Cash e Valute sono invisibili nel fiume** (~0.1–0.5% di quota): vanno letti
+  solo nella heatmap degli z-score.
+- Le attese della sezione qui sopra vengono dall'in-sample 2009 → gen 2021:
+  diventeranno regole operative solo dopo la validazione di fase 2 (regole
+  congelate su IS → un solo passaggio out-of-sample).
+"""
+    )
+
+st.divider()
+
+# ===================================================
 # SEZIONE 1: IL FIUME
 # ===================================================
 st.subheader("🌊 Il fiume — quote di dollar volume")
@@ -370,9 +438,11 @@ with st.expander("ℹ️ Metodologia e note"):
 positiva) → event study su rendimenti forward vs null appaiato, regole calibrate
 solo sull'in-sample (fino al {cutoff:%d/%m/%Y}), un solo passaggio finale
 sull'out-of-sample. La modalità ricerca nella sidebar serve a non contaminare
-l'OOS nemmeno visivamente. Il cutoff mostrato avanza col passare dei giorni
-(70% posizionale): all'avvio della fase 2 va **congelato** impostando
-`IS_END_DATE` in `src/config.py`, così il confine diventa una data assoluta.
+l'OOS nemmeno visivamente. Il confine IS/OOS è **congelato** al
+{cutoff:%d/%m/%Y} (`IS_END_DATE` in `src/config.py`); il protocollo completo —
+7 ipotesi pre-registrate, null appaiato, un solo passaggio OOS — è implementato
+nella pagina **🧪 Event study fase 2** (menu pagine in alto a sinistra) e
+documentato in `research/HYPOTHESES.md`.
 """
     )
 
