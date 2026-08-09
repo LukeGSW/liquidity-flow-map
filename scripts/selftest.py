@@ -28,6 +28,7 @@ from src.calculations import (
     dv_shares, group_dollar_volume, attention_z,
     signed_pressure, rotation, is_oos_cutoff,
 )
+from src.event_study import pooled_event_study, bh_fdr
 
 # Su Windows con stdout rediretto (subprocess, CI, redirect su file) la console
 # cp1252 non codifica i caratteri non-ASCII e la print farebbe exit 1 anche con
@@ -164,6 +165,30 @@ def main():
     prv = press_rng.values
     checks.append(("pressione 'range' in [-1,+1] con barre sporche",
                    bool((prv >= -1 - 1e-9).all() and (prv <= 1 + 1e-9).all())))
+
+    # --- 9. Motore event study: rileva un effetto piantato, one-sided corretto ---
+    rng2 = np.random.default_rng(11)
+    dates2 = pd.bdate_range("2015-01-01", periods=1500)
+    outcome = pd.Series(rng2.normal(0.0, 1.0, 1500), index=dates2)
+    vol_s = pd.Series(rng2.uniform(0.1, 0.4, 1500), index=dates2)
+    evt_dates = list(dates2[rng2.choice(np.arange(100, 1400), size=30, replace=False)])
+    outcome.loc[evt_dates] += 1.5
+    events = [("X", d) for d in evt_dates]
+    r_pos = pooled_event_study(events, {"X": outcome}, vol_s, +1, B=1000, seed=1)
+    r_neg = pooled_event_study(events, {"X": outcome}, vol_s, -1, B=1000, seed=1)
+    checks.append(("event study rileva effetto piantato (one-sided)",
+                   bool(r_pos["p"] < 0.01 and r_neg["p"] > 0.5)))
+
+    # --- 10. Event study deterministico a parità di seed ---
+    r_rep = pooled_event_study(events, {"X": outcome}, vol_s, +1, B=1000, seed=1)
+    checks.append(("event study deterministico (stesso seed, stesso p)",
+                   bool(r_rep["p"] == r_pos["p"] and r_rep["effect"] == r_pos["effect"])))
+
+    # --- 11. BH-FDR sano: q >= p, q <= 1 ---
+    pv = [0.01, 0.04, 0.03, 0.20]
+    qv = bh_fdr(pv)
+    checks.append(("BH-FDR: q >= p e q <= 1",
+                   bool(all(qq >= pp for qq, pp in zip(qv, pv)) and max(qv) <= 1.0)))
 
     # --- Report ---
     all_ok = True
