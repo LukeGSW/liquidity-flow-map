@@ -235,9 +235,10 @@ st.subheader("📌 Segnali attivi e cosa aspettarsi")
 st.markdown(
     f"""
 Gruppi in **attenzione estrema** (|z| ≥ 1.5) al {z_v.index[-1]:%d/%m/%Y}, con l'attesa
-misurata nella scansione in-sample 2009 → gen 2021 (eventi = incrocio soglia z,
-debounce 21g, null appaiato per regime di volatilità). ⚠️ *Attese IS, non ancora
-validate out-of-sample: orientano l'attenzione, non sono regole operative.*
+misurata nello studio di fase 2 (eventi = incrocio soglia z, debounce 21g, null
+appaiato per regime di volatilità). ⚠️ *Ciclo 1 di validazione completato: direzioni
+confermate anche nell'out-of-sample 2021-2026, ma senza significatività statistica
+(registro in `research/HYPOTHESES.md` §7). Tilt informativi, non regole operative.*
 """
 )
 
@@ -246,15 +247,19 @@ def attesa_is(lvl: str, group: str, zval: float) -> str:
     """Attesa post-evento misurata nella scansione IS, per livello e gruppo."""
     if lvl != "Macro-classi":
         if zval > 0:
-            return ("climax di attenzione: nell'IS la quota ha poi **restituito "
-                    "~1–1.7 pp entro 63 giorni** (mean-reversion; 17/60 test p<0.05, "
-                    "tutti concordi). Mappatura sui prezzi: fase 2.")
-        return ("settore trascurato: nell'IS la quota tende a **recuperare entro "
-                "21–63 giorni**.")
+            return ("climax di attenzione: sottoperformance media vs paniere EW "
+                    "**−1.3% (IS) / −0.6% (OOS) a 63 giorni** — direzione giusta in "
+                    "entrambi i campioni, senza conferma statistica nell'OOS "
+                    "(q=0.29, ~50 eventi). **Tilt informativo, non segnale.**")
+        return ("settore trascurato: sovraperformance relativa media **+0.6% a "
+                "63 giorni**, direzione giusta in IS e OOS ma mai significativa: "
+                "tilt debole a favore del recupero.")
     if group == "Oro/Metalli" and zval > 0:
-        return ("profilo **blow-off** nell'IS: quota ancora **su per ~1 mese "
-                "(+2 pp, robusto nei due semiperiodi)**, ma **riassorbita a 3 mesi "
-                "(−1 pp)**. Momentum breve, non trend da inseguire.")
+        return ("blow-off di **attività** nell'IS: la quota sale ancora ~1 mese "
+                "(+2 pp) e si riassorbe a 3 mesi, ma **non si è trasferito al "
+                "prezzo di GLD** (calibrazione fase 2: eccesso −0.8% a 21g, "
+                "direzione opposta all'attesa — ipotesi ritirata). Churn, non "
+                "domanda netta: nessuna implicazione direzionale sul prezzo.")
     if group == "Treasury" and zval > 0:
         return "lieve mean-reversion della quota a 21 giorni nell'IS (−0.3 pp)."
     if group in ("Treasury", "Credito") and zval < 0:
@@ -284,13 +289,18 @@ with st.expander("⚠️ Cosa NON leggere in questa dashboard (testato e bocciat
 - **A livello macro nessun evento di attenzione ha predetto il mercato nell'IS**
   (112 test su VTI: significativi ≈ attesi dal caso, min q-FDR 0.79). Il livello
   macro è una mappa di regime, non un segnale di timing sull'equity.
+- **L'attenzione sull'oro non è un segnale di prezzo su GLD.** Il momentum della
+  quota è reale (+2 pp a 21g) ma in calibrazione fase 2 GLD è andato nella
+  direzione opposta all'attesa: attività ≈ churn bilaterale (H4 ritirata).
 - **La pressione firmata del gruppo Cash è rumore strutturale** (il prezzo di
   BIL/SHV si muove quasi solo per accrual): leggerla come "assente".
 - **Cash e Valute sono invisibili nel fiume** (~0.1–0.5% di quota): vanno letti
   solo nella heatmap degli z-score.
-- Le attese della sezione qui sopra vengono dall'in-sample 2009 → gen 2021:
-  diventeranno regole operative solo dopo la validazione di fase 2 (regole
-  congelate su IS → un solo passaggio out-of-sample).
+- **Il passaggio out-of-sample (2021 → 2026) è stato eseguito e nessuna ipotesi
+  ha raggiunto la conferma statistica** (direzione giusta su tutte e 4 le attive,
+  q=0.29 — con ~50 eventi la potenza non basta per effetti di questa taglia).
+  Le attese di questa pagina sono tilt informativi, non regole operative;
+  registro completo in `research/HYPOTHESES.md` §7.
 """
     )
 
