@@ -1,0 +1,71 @@
+# Report notturno Liquidity Flow Map:
+#   - gira dopo la chiusura USA (04:30 UTC = 05:30/06:30 ora italiana;
+#     il cron di GitHub Actions è in UTC e può slittare di 15-60 minuti,
+#     irrilevante per dati end-of-day)
+#   - calcola la pipeline, registra gli eventi in research/live_events_log.csv
+#     (registro real-time per il re-test futuro) e committa il log
+#   - manda su Telegram: alert se ci sono eventi nuovi, digest il sabato,
+#     silenzio altrimenti
+#
+# Secrets richiesti (Settings -> Secrets and variables -> Actions):
+#   EODHD_API_KEY, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
+
+name: nightly-liquidity-report
+
+on:
+  schedule:
+    - cron: "30 4 * * *"
+  workflow_dispatch:
+    inputs:
+      force_digest:
+        description: "Invia il digest anche se non è sabato"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nightly-report
+  cancel-in-progress: false
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install "pandas>=2.2" "numpy>=1.26" "requests>=2.31"
+
+      - name: Run nightly report
+        env:
+          EODHD_API_KEY: ${{ secrets.EODHD_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python scripts/nightly_report.py ${{ inputs.force_digest && '--force-digest' || '' }}
+
+      # if: always() è essenziale: se Telegram fallisce dopo che gli eventi
+      # sono stati appesi al log, il commit deve girare comunque — altrimenti
+      # il runner effimero butta via righe del registro real-time che non
+      # verrebbero mai più ri-rilevate (si rileva solo l'ultima barra).
+      - name: Commit event log and state
+        if: always()
+        run: |
+          git config user.name "liquidity-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A research/
+          if git diff --staged --quiet; then
+            echo "nessuna modifica al log"
+          else
+            git commit -m "nightly: log eventi $(date -u +%F)"
+            git pull --rebase origin ${GITHUB_REF_NAME}
+            git push
+          fi
