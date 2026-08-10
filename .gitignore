@@ -20,3 +20,7 @@ Thumbs.db
 *.csv
 *.parquet
 data/
+
+# Eccezione: il registro eventi live DEVE essere versionato
+# (è il log real-time per il re-test futuro, committato dal job notturno)
+!research/live_events_log.csv
