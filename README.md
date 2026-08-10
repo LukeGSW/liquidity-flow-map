@@ -115,6 +115,40 @@ completo delle esecuzioni in `research/HYPOTHESES.md` §7, incluse le opzioni
 per un eventuale ciclo 2 (fattore cross-sectional, con 2021-2026 ormai
 semi-contaminato).
 
+## Report notturno su Telegram (GitHub Actions)
+
+Ogni notte (04:30 UTC ≈ 05:30/06:30 italiane, dopo la chiusura USA) il workflow
+`.github/workflows/nightly.yml` esegue `scripts/nightly_report.py`:
+
+- ricalcola la pipeline congelata su entrambi i livelli (macro + settori);
+- registra gli incroci di soglia in **`research/live_events_log.csv`** e lo
+  committa: è il **registro real-time degli eventi** per il re-test futuro —
+  ogni evento viene "chiamato" prima che i suoi rendimenti forward esistano,
+  quindi il look-ahead è impossibile per costruzione;
+- manda su Telegram: **alert completo** se ci sono eventi nuovi (con tilt
+  validati e contesto: segnali attivi, rotazione, regime), **digest
+  settimanale** il sabato mattina, **silenzio** negli altri giorni (niente
+  alert-fatigue); in caso di errore del job arriva un avviso.
+
+### Setup (una tantum)
+
+1. **Bot Telegram**: su Telegram cerca `@BotFather` → `/newbot` → copia il
+   token. Poi manda un messaggio qualsiasi al tuo bot e apri
+   `https://api.telegram.org/bot<TOKEN>/getUpdates`: il tuo `chat.id` è nel
+   JSON di risposta.
+2. **Secrets GitHub**: repo → Settings → Secrets and variables → Actions →
+   New repository secret, tre voci: `EODHD_API_KEY`, `TELEGRAM_BOT_TOKEN`,
+   `TELEGRAM_CHAT_ID`.
+3. **Test manuale**: tab Actions → `nightly-liquidity-report` → Run workflow.
+   Per forzare un digest di prova: aggiungi `--force-digest` al comando dello
+   script (o eseguilo in locale con i tre secret come variabili d'ambiente).
+
+Test del rendering senza rete né secrets:
+
+```bash
+python scripts/nightly_report.py --selftest
+```
+
 ## Caveat onesti
 
 - Il DV degli ETF è un proxy dell'**attenzione**, non dei flussi reali (futures e
