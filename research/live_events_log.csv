@@ -1,2 +1,4 @@
 date,level,group,threshold,direction,z,share_pct,logged_at_utc
 2026-08-07,SETTORI,Utility,1.5,su,1.54,7.73,2026-08-10T05:38:17+00:00
+2026-08-11,SETTORI,Utility,2.0,su,2.15,8.04,2026-08-12T05:53:08+00:00
+2026-08-11,SETTORI,Materiali,1.5,su,1.58,5.25,2026-08-12T05:53:08+00:00
