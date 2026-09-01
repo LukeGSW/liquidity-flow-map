@@ -6,3 +6,4 @@ date,level,group,threshold,direction,z,share_pct,logged_at_utc
 2026-08-14,SETTORI,Materiali,2.0,su,2.13,5.51,2026-08-15T04:55:03+00:00
 2026-08-17,MACRO,Treasury,2.0,su,2.03,4.23,2026-08-18T05:00:59+00:00
 2026-08-18,SETTORI,Industriali,1.5,giu,-1.53,10.51,2026-08-19T05:01:19+00:00
+2026-08-31,MACRO,Cash (T-Bill),1.5,su,1.58,1.39,2026-09-01T09:31:31+00:00
