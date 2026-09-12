@@ -9,3 +9,4 @@ date,level,group,threshold,direction,z,share_pct,logged_at_utc
 2026-08-31,MACRO,Cash (T-Bill),1.5,su,1.58,1.39,2026-09-01T09:31:31+00:00
 2026-09-01,SETTORI,Tecnologia,1.5,giu,-1.51,12.36,2026-09-02T08:54:07+00:00
 2026-09-02,MACRO,Credito,1.5,su,1.54,7.04,2026-09-03T09:03:50+00:00
+2026-09-11,SETTORI,Finanziari,1.5,su,1.55,17.15,2026-09-12T08:43:56+00:00
