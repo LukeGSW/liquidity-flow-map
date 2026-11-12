@@ -19,3 +19,4 @@ date,level,group,threshold,direction,z,share_pct,logged_at_utc
 2026-10-30,SETTORI,Consumi difens.,1.5,su,1.77,10.28,2026-10-31T10:29:56+00:00
 2026-11-02,SETTORI,Consumi difens.,2.0,su,2.08,10.61,2026-11-03T12:09:09+00:00
 2026-11-06,SETTORI,Finanziari,1.5,giu,-1.76,13.86,2026-11-07T11:13:36+00:00
+2026-11-11,SETTORI,Finanziari,2.0,giu,-2.15,13.35,2026-11-12T13:01:37+00:00
